@@ -1,0 +1,60 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+
+html, body, #application{
+	height: 100%;
+	overflow: hidden;
+}
+
+.diagram-container{
+	background: #333333;
+	width: 100%;
+	height: 100%;
+}
+
+.circle-node{
+	border: 1px solid gray;
+	border-radius: 50%;
+	background: darkblue;
+	min-width: 50px;
+	min-height: 50px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	position: relative;
+}
+
+.rectangle-node{
+	border: 1px solid gray;
+	border-radius: 5px;
+	background: darkblue;
+	min-width: 50px;
+	min-height: 50px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	position: relative;
+}
+
+/* Static 75x75 */
+/* .custom-node{
+	border: 1px solid gray;
+	border-radius: 50%;
+	background: darkblue;
+	min-width: 75px;
+	height: 75px;
+	display: flex;
+	align-items: center;
+	justify-content: 'space-between';
+	position: relative;
+} */
+
+.circle-port{
+	background-color: red;
+}
+
+.circle-port:hover{
+	background: mediumpurple;
+}
