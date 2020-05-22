@@ -2,42 +2,56 @@ import { NodeModel, DefaultPortModel } from '@projectstorm/react-diagrams';
 import { BaseModelOptions } from '@projectstorm/react-canvas-core';
 
 export interface CircleNodeModelOptions extends BaseModelOptions {
-    color?: string;
-    label?: string;
+    type?: string;
+	label?: string;
+	data?: object;
+	fct?: object;
 }
 
 export class CircleNodeModel extends NodeModel {
-    color: string;
-    label: string;
+    type: string;
+	label: string;
+	data: object;
+	fct: object;
 
 	constructor(options: CircleNodeModelOptions = {}) {
 		super({
 			...options,
 			type: 'circle-node'
 		});
-        this.color = options.color || 'red';
-        this.label = options.label || 'Enter Label';
+        this.type = options.type || 'Organizations';
+		this.label = options.label || 'Enter Label';
+		this.data = options.data || {};
+		this.fct = options.fct || {};
 
 		// setup an in and out port
 		this.addPort(
 			new DefaultPortModel({
 				in: false,
-				name: 'port'
+				name: 'port',
 			})
 		);
 	}
 
+
+	getWidth() {
+		return this.width;
+	}
 	serialize() {
 		return {
 			...super.serialize(),
-            color: this.color,
-            label: this.label
+            type: this.type,
+			label: this.label,
+			data: this.data,
+			fct: this.fct,
 		};
 	}
 
 	deserialize(event): void {
 		super.deserialize(event);
-        this.color = event.data.color;
-        this.label = event.data.label;
+        this.type = event.data.type;
+		this.label = event.data.label;
+		this.data = event.data.data;
+		this.fct = event.data.fct;
 	}
 }

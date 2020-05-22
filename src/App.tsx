@@ -5,7 +5,9 @@ import Graph from './Components/Graph'
 
 function App() {
   return (
-    <Graph/>
+    <div className = 'App-header'>
+      <Graph/>
+    </div>
   );
 }
 

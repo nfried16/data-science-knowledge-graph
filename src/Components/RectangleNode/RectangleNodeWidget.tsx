@@ -18,7 +18,7 @@ export class RectangleNodeWidget extends React.Component<RectangleNodeWidgetProp
 	render() {
 		return (
 			<div style = {{background: this.props.node.color}} className="rectangle-node">
-                <PortWidget style = {{position: 'relative', left: '50%'}} engine={this.props.engine} port={this.props.node.getPort('port')}>
+                <PortWidget engine={this.props.engine} port={this.props.node.getPort('in')}>
                     <div className="circle-port" />
                 </PortWidget>
                 <div style = {{margin: 10, display: 'flex', justifyItems: 'center', alignItems: 'center', position: 'relative'}}>
@@ -27,7 +27,7 @@ export class RectangleNodeWidget extends React.Component<RectangleNodeWidgetProp
                             {this.props.node.label}
                         </b>
                     </div>
-                    <div style = {{padding: '50% 0', width: 'auto'}}>
+                    <div style = {{padding: '25% 0', width: 'auto'}}>
                         <div style = {{visibility: 'hidden', height: 0}}>
                             <b>
                                 {this.props.node.label}
@@ -35,6 +35,9 @@ export class RectangleNodeWidget extends React.Component<RectangleNodeWidgetProp
                         </div>
                     </div>
                 </div>
+                <PortWidget engine={this.props.engine} port={this.props.node.getPort('out')}>
+                    <div className="circle-port" />
+                </PortWidget>
 			</div>
 		);
 	}

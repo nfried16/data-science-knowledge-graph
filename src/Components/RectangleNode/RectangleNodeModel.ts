@@ -22,7 +22,13 @@ export class RectangleNodeModel extends NodeModel {
 		this.addPort(
 			new DefaultPortModel({
 				in: false,
-				name: 'port'
+				name: 'in'
+			})
+		);
+		this.addPort(
+			new DefaultPortModel({
+				in: false,
+				name: 'out'
 			})
 		);
 	}

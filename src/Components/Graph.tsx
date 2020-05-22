@@ -1,127 +1,215 @@
-import createEngine, { DiagramModel, DefaultNodeModel, DefaultLinkModel, LinkModel } from '@projectstorm/react-diagrams';
+import createEngine, { DiagramModel, DefaultLinkModel } from '@projectstorm/react-diagrams';
 import * as React from 'react';
 import { CanvasWidget } from '@projectstorm/react-canvas-core';
 import styled from '@emotion/styled';
 import './main.css'
+import { Checkbox, Button } from 'semantic-ui-react';
 import { DemoCanvasWidget } from '../helpers/DemoCanvasWidget'
 import { CircleNodeFactory } from './CircleNode/CircleNodeFactory';
 import { CircleNodeModel } from './CircleNode/CircleNodeModel';
+import { CustomLabelFactory } from './CustomLabel/CustomLabelFactory'
 import { RectangleNodeFactory } from './RectangleNode/RectangleNodeFactory';
 import { RectangleNodeModel } from './RectangleNode/RectangleNodeModel';
-import { ZoomCanvasAction } from '@projectstorm/react-canvas-core';
-import { findByLabelText } from '@testing-library/react';
+import { ZoomCanvasAction, InputType } from '@projectstorm/react-canvas-core';
+import 'semantic-ui-css/semantic.min.css';
 
-export default () => {
-	const circleengine = (() => {
-		//1) setup the diagram engine
+const linkcolors = {
+	'Organizations::Faculty': '#000000',
+	'Organizations::Programs': '#000000',
+	'Organizations::Hubs': '#000000',
+	'Faculty::Programs': '#000000',
+	'Faculty::Hubs': '#FFFFFF',
+	'Programs::Hubs': '#FFFFFF'
+}
+
+const types = [
+	'Organizations',
+	'Faculty',
+	'Programs',
+	'Hubs'
+]
+
+let allnodes = [];
+let nodes = {
+	'Organizations': [],
+	'Programs': [],
+	'Faculty': [],
+	'Hubs': [],
+}
+
+let alllinks = [];
+let links = {
+	'Organizations': [],
+	'Programs': [],
+	'Faculty': [],
+	'Hubs': [],
+}
+
+class Graph extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.disableZoom = this.disableZoom.bind(this)
+	}
+	state = {
+		engine: null,
+	}
+
+	getColor(t1, t2) {
+		let names = [t1+'::'+t2, t2+'::'+t1];
+		const keys = Object.keys(linkcolors);
+		if(keys.includes(names[0])) {
+			return linkcolors[names[0]];
+		}
+		else if(keys.includes(names[1])) {
+			return linkcolors[names[1]];
+		}
+		return '#FFFFFF';
+	}
+
+	componentWillMount() {
+		const ret = [
+			{name: 'DAML', type: 'Organizations', links: []},
+			{name: 'Data+', type: 'Programs', links: []},
+			{name: 'DUML', type: 'Organizations', links: []},
+			{name: 'Dr. Professor', type: 'Faculty', links: ['Research']},
+			{name: 'Research', type: 'Programs', links: []},
+			{name: 'Math Department', type: 'Hubs', links: []},
+			{name: 'CS Department', type: 'Hubs', links: ['Data+']},
+			{name: 'Stats Department', type: 'Hubs', links: ['Research']},
+			{name: 'Humanities', type: 'Hubs', links: ['Data+']},
+		];
+
+		// For Circle Layout
+		const points = ret.length;
+		let allpos = [];
+		const rad = 150*ret.length/(2*Math.PI);
+		for(var a = 3*Math.PI; a > Math.PI; a-=(2*Math.PI/ret.length)) {
+			allpos.push([Math.cos(a) * rad, Math.sin(a) * rad]);
+		}
+		
+		//For Grid Layout
+
+		const pos = {
+			'Hubs': [50, 50],
+			'Organizations': [50, 150],
+			'Faculty': [50, 250],
+			'Programs': [50, 350],
+		}
+		
+		// Add Nodes
+		ret.forEach(add => {
+			const node = new CircleNodeModel({ fct: this.disableZoom, label: add.name, type: add.type, 
+				data: {
+						'Type': 'Faculty',
+						'History': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non nisl ac eros pharetra fringilla. Nullam malesuada tempus erat. Cras vel purus rhoncus, sodales massa non, interdum mauris. Phasellus id nulla non risus posuere porttitor. Phasellus ac nisi et lectus molestie efficitur vel a eros. Proin turpis mi, auctor eget nisi ac, pharetra euismod nulla. Fusce vulputate tellus sed sapien vestibulum elementum. Ut et tellus ac diam malesuada vulputate eget eu tortor.',
+						'Mission Statement': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non nisl ac eros pharetra fringilla. Nullam malesuada tempus erat. Cras vel purus rhoncus, sodales massa non, interdum mauris. Phasellus id nulla non risus posuere porttitor. Phasellus ac nisi et lectus molestie efficitur vel a eros. Proin turpis mi, auctor eget nisi ac, pharetra euismod nulla. Fusce vulputate tellus sed sapien vestibulum elementum. Ut et tellus ac diam malesuada vulputate eget eu tortor.',
+						'Link': 'www.link.com',
+						'How can I get Involved?': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non nisl ac eros pharetra fringilla.'
+					  } 
+			});
+			nodes[node.type].push(node);
+			allnodes.push(node);
+			node.setPosition(allpos[allnodes.length-1][0], allpos[allnodes.length-1][1]);
+			//FIX THIS
+			setTimeout(() => {
+				node.setPosition(node.getX() - node.getWidth()/2, node.getY() - node.getWidth()/2);
+			})
+			pos[add.type][0]+=200;
+		})
+		// Add Links and Labels
+		ret.forEach(source => {
+			const sourcenode = allnodes.find(el => el.label === source.name);
+			source.links.forEach(target => {
+				const targetnode = allnodes.find(el => el.label === target);
+				const link = new DefaultLinkModel();
+				links[sourcenode.type].push(link);
+				links[targetnode.type].push(link);
+				link.setSourcePort(sourcenode.getPort('port'));
+				link.setTargetPort(targetnode.getPort('port'));
+				link.getOptions().curvyness = 0;
+				link.getOptions().width = 2;
+				link.setLocked();
+				link.setColor(this.getColor(sourcenode.type, targetnode.type));
+				// link.addLabel(sourcenode.type + '::' + targetnode.type);
+				link.addLabel('sponsors');
+				alllinks.push(link);
+			})
+		})
+		//4) add the models to the root graph
+		let model = new DiagramModel();
+		model.addAll(...allnodes, ...alllinks);
 		const engine = createEngine({ registerDefaultZoomCanvasAction: false });
 		engine.getActionEventBus().registerAction(new ZoomCanvasAction({ inverseZoom: true }));
-		//2) setup the diagram model
-		var model = new DiagramModel();
 		engine.getNodeFactories().registerFactory(new CircleNodeFactory());
-
-		//3-A) create a default node
-		const node0 = new CircleNodeModel({ label: 'DAML', color: 'rgb(255,0,192)' });
-		node0.setPosition(412.5, 25);
-		//3-B) create another default node
-		const node1 = new CircleNodeModel({ label: 'Data+', color: 'rgb(0,192,255)' });
-		node1.setPosition(25, 75);
-		//3-C) another
-		const node2 = new CircleNodeModel({ label: 'DUML', color: 'rgb(192,255,0)' });
-		node2.setPosition(400, 250);
-		//3-D) another
-		const node3 = new CircleNodeModel({ label: 'Research', color: 'rgb(255,192,0)' });
-		node3.setPosition(75, 400);
-		
-		// link the ports
-		const link0 = new DefaultLinkModel();
-		const link1 = new DefaultLinkModel();
-		const link2 = new DefaultLinkModel();
-		link0.setSourcePort(node0.getPort('port'));
-		link0.setTargetPort(node1.getPort('port'));
-		link0.getOptions().curvyness = 0;
-		link0.setLocked();
-		link2.setSourcePort(node1.getPort('port'));
-		link2.setTargetPort(node2.getPort('port'));
-		link2.getOptions().curvyness = 0;
-		link2.setLocked();
-		link1.setSourcePort(node2.getPort('port'));
-		link1.setTargetPort(node3.getPort('port'));
-		link1.getOptions().curvyness = 0;
-		link1.setLocked();
-
-		//4) add the models to the root graph
-		model.addAll(node0, node1, node2, link0, link1, link2, node3);
-		//5) load model into engine
+		engine.getLabelFactories().registerFactory(new CustomLabelFactory());
 		engine.setModel(model);
-		return engine;
-	})()
-	const rectangleengine = (() => {
-		//1) setup the diagram engine
-		const engine = createEngine({ registerDefaultZoomCanvasAction: false });
-		engine.getActionEventBus().registerAction(new ZoomCanvasAction({ inverseZoom: true }));
-		//2) setup the diagram model
-		var model = new DiagramModel();
-		engine.getNodeFactories().registerFactory(new RectangleNodeFactory());
+		this.setState({engine: engine}, this.resetZoom)
+	}
 
-		//3-A) create a default node
-		const node0 = new RectangleNodeModel({ label: 'DAML', color: 'rgb(255,0,192)' });
-		node0.setPosition(412.5, 25);
-		//3-B) create another default node
-		const node1 = new RectangleNodeModel({ label: 'Data+', color: 'rgb(0,192,255)' });
-		node1.setPosition(25, 75);
-		//3-C) another
-		const node2 = new RectangleNodeModel({ label: 'DUML', color: 'rgb(192,255,0)' });
-		node2.setPosition(400, 250);
-		//3-D) another
-		const node3 = new RectangleNodeModel({ label: 'Research', color: 'rgb(255,192,0)' });
-		node3.setPosition(75, 400);
-		
-		// link the ports
-		const link0 = new DefaultLinkModel();
-		const link1 = new DefaultLinkModel();
-		const link2 = new DefaultLinkModel();
-		link0.setSourcePort(node0.getPort('port'));
-		link0.setTargetPort(node1.getPort('port'));
-		link0.getOptions().curvyness = 0;
-		link0.setLocked();
-		link2.setSourcePort(node1.getPort('port'));
-		link2.setTargetPort(node2.getPort('port'));
-		link2.getOptions().curvyness = 0;
-		link2.setLocked();
-		link1.setSourcePort(node2.getPort('port'));
-		link1.setTargetPort(node3.getPort('port'));
-		link1.getOptions().curvyness = 0;
-		link1.setLocked();
+	resetZoom() {
+		setTimeout(() => {
+			const tempengine = this.state.engine;
+			tempengine.getModel().clearSelection();
+			tempengine.zoomToFitNodes(40);
+			this.setState({engine: tempengine})
+		})
+	}
 
-		//4) add the models to the root graph
-		model.addAll(node0, node1, node2, link0, link1, link2, node3);
-		//5) load model into engine
-		engine.setModel(model);
-		return engine;
-	})()
-	//6) render the diagram!
-	const FullscreenCanvas = styled(DemoCanvasWidget)`
-	height: 100%;
-	width: 100%;
-	`;
-	const Container = styled.div`
-	height: 100vh;
-	width: 100vw;
-	`;
+	updateModel(data) {
+		let model = this.state.engine.getModel();
+		if(!data.checked) {
+			links[data.label].forEach(rem => {
+				model.removeLink(rem);
+			})
+			nodes[data.label].forEach(rem => {
+				model.removeNode(rem);
+			})
+		}
+		else if(data.checked) {
+			links[data.label].forEach(add => {
+				const active = Object.values(model.getActiveNodeLayer().getNodes());
+				if(active.includes(add.getSourcePort().getParent()) || active.includes(add.getTargetPort().getParent()))
+				model.addLink(add);
+			})
+			nodes[data.label].forEach(add => {
+				model.addNode(add);
+			})
+		}
+		this.state.engine.setModel(model);
+	}
 
-	return (
-		<div style = {{height:'100vh',width:'100vw', display: 'flex', alignItems: 'center', justifyContent: 'space-evenly'}}>
-			<div style = {{overflow: 'hidden', borderRadius: '10px', backgroundColor: 'yellow', height: 500, width: 500}}>
-				<FullscreenCanvas>
-					<CanvasWidget engine={circleengine} />
-				</FullscreenCanvas>
+	disableZoom(disable) {
+		if(disable)
+			this.state.engine.getActionEventBus().deregisterAction(this.state.engine.getActionEventBus().getActionsForType(InputType.MOUSE_WHEEL)[0])
+		else
+			this.state.engine.getActionEventBus().registerAction(new ZoomCanvasAction({ inverseZoom: true }))
+	}
+
+	render() {
+		return (
+			<div style = {{height:'100vh',width:'100vw', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+				<div style = {{margin: 20}}><Button onClick = {() => this.resetZoom()}>Reset</Button></div>
+				<div style = {{overflow: 'hidden', borderRadius: '10px', height: '90vh', width: '90vh'}}>
+					<div style = {{display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', background: '#DDDDDD', height: 30, width: '100%'}}>
+						{
+							types.map(type => {
+								return <Checkbox defaultChecked = {true} key = {type} label = {type}
+										onChange = {(e, data) => {
+											this.updateModel(data)
+										}}>	
+										</Checkbox>
+							})
+						}
+					</div>
+					<DemoCanvasWidget>
+						<CanvasWidget engine={this.state.engine}>
+						</CanvasWidget>
+					</DemoCanvasWidget>
+				</div>
 			</div>
-			<div style = {{overflow: 'hidden', borderRadius: '10px', backgroundColor: 'yellow', height: 500, width: 500}}>
-				<FullscreenCanvas>
-					<CanvasWidget engine={rectangleengine} />
-				</FullscreenCanvas>
-			</div>
-		</div>
-	);
+		);
+	}
 };
+
+export default Graph;
