@@ -2,11 +2,12 @@ import * as React from 'react';
 import { DiagramEngine, PortWidget } from '@projectstorm/react-diagrams-core';
 import { CircleNodeModel } from './CircleNodeModel';
 import { Card } from 'semantic-ui-react';
+import { ZoomCanvasAction, InputType } from '@projectstorm/react-canvas-core';
 
 const color = {
-	'Organizations': ['#262626', '#FFFFFF'],
-	'Programs': ['#DBEDF2', '#000000'],
-	'Faculty': ['#FFFFFF', '#000000'],
+	'Organizations': ['#1E2C3A', '#FFFFFF'],
+	'Programs': ['#E6E7E8', '#000000'],
+	'Faculty': ['#A9A9A9', '#000000'],
 	'Hubs': ['#00009C', '#FFFFFF']
 }
 
@@ -42,15 +43,11 @@ export class CircleNodeWidget extends React.Component<CircleNodeWidgetProps, Cir
             this.drag = true;
     }
 
-    updateZoom(e, engine) {
-        if(typeof this.props.node.fct == 'function') {
-            if(e.type === 'mouseenter') {
-                this.props.node.fct(true);
-            }
-            else {
-                this.props.node.fct(false);
-            }
-        }
+    disableZoom(disable) {
+        if(disable)
+            this.props.engine.getActionEventBus().deregisterAction(this.props.engine.getActionEventBus().getActionsForType(InputType.MOUSE_WHEEL)[0])
+        else
+            this.props.engine.getActionEventBus().registerAction(new ZoomCanvasAction({ inverseZoom: true }))
     }
 
 	render() {
@@ -77,7 +74,7 @@ export class CircleNodeWidget extends React.Component<CircleNodeWidgetProps, Cir
                 </div>
                 {
                     this.state.clicked &&
-                    <Card onMouseLeave = {(e) => this.updateZoom(e, this.props.engine)} onMouseEnter = {(e) => this.updateZoom(e, this.props.engine)} style = {{zIndex: 1, transform: 'translateX(-50%)', left: '50%', position: 'absolute', marginTop: 1, maxWidth: 300}}>
+                    <Card onMouseLeave = {(e) => this.disableZoom(false)} onMouseEnter = {(e) => this.disableZoom(true)} style = {{zIndex: 1, transform: 'translateX(-50%)', left: '50%', position: 'absolute', marginTop: 1, maxWidth: 300}}>
                         <Card.Content style = {{maxHeight: 300, overflow: 'auto', whiteSpace: 'pre-line', textAlign: 'left', clear: 'both', fontSize: 11, width: '100%', color: 'black', position: 'relative'}}>
                             <Card.Header textAlign = 'center'>
                                 {this.props.node.label}

@@ -1,5 +1,5 @@
 import { DiagramEngine, LabelModel, LabelModelGenerics, LabelModelOptions } from '@projectstorm/react-diagrams-core';
-import { DeserializeEvent } from '@projectstorm/react-canvas-core';
+import { BaseEntityEvent, BaseModelOptions, DeserializeEvent } from '@projectstorm/react-canvas-core';
 
 export interface CustomLabelModelOptions extends LabelModelOptions {
 	label?: string;
@@ -12,7 +12,7 @@ export interface CustomLabelModelGenerics extends LabelModelGenerics {
 export class CustomLabelModel extends LabelModel<CustomLabelModelGenerics> {
 	constructor(options: CustomLabelModelOptions = {}) {
 		super({
-			offsetY: options.offsetY == null ? -23 : options.offsetY,
+			offsetY: options.offsetY == null ? -13 : options.offsetY,
 			type: 'custom',
 			...options
 		});
@@ -30,7 +30,7 @@ export class CustomLabelModel extends LabelModel<CustomLabelModelGenerics> {
 	serialize() {
 		return {
 			...super.serialize(),
-			label: this.options.label
+			label: this.options.label,
 		};
 	}
 }

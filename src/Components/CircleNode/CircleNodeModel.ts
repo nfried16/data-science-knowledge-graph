@@ -5,14 +5,12 @@ export interface CircleNodeModelOptions extends BaseModelOptions {
     type?: string;
 	label?: string;
 	data?: object;
-	fct?: object;
 }
 
 export class CircleNodeModel extends NodeModel {
     type: string;
 	label: string;
 	data: object;
-	fct: object;
 
 	constructor(options: CircleNodeModelOptions = {}) {
 		super({
@@ -22,7 +20,6 @@ export class CircleNodeModel extends NodeModel {
         this.type = options.type || 'Organizations';
 		this.label = options.label || 'Enter Label';
 		this.data = options.data || {};
-		this.fct = options.fct || {};
 
 		// setup an in and out port
 		this.addPort(
@@ -43,7 +40,6 @@ export class CircleNodeModel extends NodeModel {
             type: this.type,
 			label: this.label,
 			data: this.data,
-			fct: this.fct,
 		};
 	}
 
@@ -52,6 +48,5 @@ export class CircleNodeModel extends NodeModel {
         this.type = event.data.type;
 		this.label = event.data.label;
 		this.data = event.data.data;
-		this.fct = event.data.fct;
 	}
 }

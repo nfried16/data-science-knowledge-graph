@@ -6,7 +6,7 @@ import { DiagramEngine } from '@projectstorm/react-diagrams-core';
 
 export class CustomLabelFactory extends AbstractReactFactory<CustomLabelModel, DiagramEngine> {
 	constructor() {
-		super('default');
+		super('custom');
 	}
 
 	generateReactWidget(event): JSX.Element {
