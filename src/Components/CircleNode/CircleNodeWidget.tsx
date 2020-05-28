@@ -5,10 +5,10 @@ import { Card } from 'semantic-ui-react';
 import { ZoomCanvasAction, InputType } from '@projectstorm/react-canvas-core';
 
 const color = {
-	'Organizations': ['#1E2C3A', '#FFFFFF'],
-	'Programs': ['#E6E7E8', '#000000'],
+	'Organizations': ['#1E2C3A', '#000000'],
+	'Programs': ['#D4040A', '#000000'],
 	'Faculty': ['#A9A9A9', '#000000'],
-	'Hubs': ['#00009C', '#FFFFFF']
+	'Hubs': ['#00009C', '#000000']
 }
 
 export interface CircleNodeWidgetProps {
@@ -53,18 +53,18 @@ export class CircleNodeWidget extends React.Component<CircleNodeWidgetProps, Cir
 	render() {
 		return (
             <div>
-                <div style = {{background: color[this.props.node.type][0]}} className="circle-node" onMouseDown = {() => this.down = true} onMouseMove = {() => this.checkDrag(this.down)} onMouseUp = {() => this.popUp(this.drag)}>
+                <div style = {{borderColor: color[this.props.node.type][0]}} className="circle-node" onMouseDown = {() => this.down = true} onMouseMove = {() => this.checkDrag(this.down)} onMouseUp = {() => this.popUp(this.drag)}>
                     <PortWidget style = {{position: 'absolute', left: '50%'}} engine={this.props.engine} port={this.props.node.getPort('port')}>
                         <div className="circle-port" />
                     </PortWidget>
-                    <div style = {{margin: 10, display: 'flex', justifyItems: 'center', alignItems: 'center', position: 'relative', fontFamily: 'Calibri', fontSize: 10, whiteSpace: 'nowrap'}}>
+                    <div style = {{margin: 10, display: 'flex', justifyItems: 'center', alignItems: 'center', position: 'relative', fontFamily: 'Calibri', fontSize: 12, whiteSpace: 'nowrap'}}>
                         <div style = {{color: color[this.props.node.type][1], position: 'absolute'}}>
                             <b>
                                 {this.props.node.label}
                             </b>
                         </div>
                         <div style = {{padding: '50% 0', width: 'auto'}}>
-                            <div style = {{visibility: 'hidden', height: 0, fontSize: 10}}>
+                            <div style = {{visibility: 'hidden', height: 0, fontSize: 12}}>
                                 <b>
                                     {this.props.node.label}
                                 </b>

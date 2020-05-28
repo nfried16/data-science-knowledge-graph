@@ -10,17 +10,16 @@ export interface CustomLabelWidgetProps {
 export const Label = styled.div`
 	background: rgba(255, 255, 255, 0);
 	border-radius: 5px;
-	color: black;
+	color: rgb(0,0,255);
 	font-weight: 700;
-	font-size: 12px;
+	font-size: 20px;
 	padding: 0px 3px;
-	font-family: sans-serif;
+	font-family: Verdana, Geneva, sans-serif;;
 	user-select: none;
 `;
 
 export class CustomLabelWidget extends React.Component<CustomLabelWidgetProps> {
 	render() {
-		console.log(this.props.model.isSelected())
 		return (
 			<Label>{this.props.model.isSelected() && this.props.model.getOptions().label}</Label>
 		);

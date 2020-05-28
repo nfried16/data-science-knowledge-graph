@@ -95,7 +95,7 @@ export class CustomLinkWidget extends React.Component<CustomLinkProps, CustomLin
 				onSelection={selected => {
 					this.setState({ selected: selected }, () => {
 					this.props.link.getLabels()[0].setSelected(selected);
-					console.log(this.props.link.getLabels()[0].isSelected())
+					this.props.diagramEngine.repaintCanvas();
 					});
 				}}
 				extras={extraProps}

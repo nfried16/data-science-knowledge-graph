@@ -20,8 +20,8 @@ const linkcolors = {
 	'Organizations::Programs': '#000000',
 	'Organizations::Hubs': '#000000',
 	'Faculty::Programs': '#000000',
-	'Faculty::Hubs': '#FFFFFF',
-	'Programs::Hubs': '#FFFFFF'
+	'Faculty::Hubs': '#000000',
+	'Programs::Hubs': '#000000'
 }
 
 const types = [
@@ -81,7 +81,7 @@ class Graph extends React.Component {
 		// For Circle Layout
 		const points = ret.length;
 		let allpos = [];
-		const rad = 150*ret.length/(2*Math.PI);
+		const rad = 175*ret.length/(2*Math.PI);
 		for(var a = 3*Math.PI; a > Math.PI; a-=(2*Math.PI/ret.length)) {
 			allpos.push([Math.cos(a) * rad, Math.sin(a) * rad]);
 		}
