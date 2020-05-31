@@ -151,7 +151,7 @@ class Graph extends React.Component {
 		setTimeout(() => {
 			const tempengine = this.state.engine;
 			tempengine.getModel().clearSelection();
-			tempengine.zoomToFitNodes(40);
+			tempengine.zoomToFitNodes(50);
 			this.setState({engine: tempengine})
 		})
 	}
@@ -183,9 +183,8 @@ class Graph extends React.Component {
 	render() {
 		return (
 			<div style = {{height:'100vh',width:'100vw', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-				<div style = {{margin: 20}}><Button onClick = {() => this.resetZoom()}>Reset</Button></div>
-				<div style = {{overflow: 'hidden', borderRadius: '10px', height: '90vh', width: '90vh'}}>
-					<div style = {{display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', background: '#DDDDDD', height: 30, width: '100%'}}>
+				<div style = {{height: '100%', width: '100%'}}>
+					<div style = {{display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', background: '#DDDDDD', height: '5vh', width: '100%'}}>
 						{
 							types.map(type => {
 								return <Checkbox defaultChecked = {true} key = {type} label = {type}
