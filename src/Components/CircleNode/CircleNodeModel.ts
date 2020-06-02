@@ -1,5 +1,6 @@
 import { NodeModel, DefaultPortModel } from '@projectstorm/react-diagrams';
 import { BaseModelOptions } from '@projectstorm/react-canvas-core';
+import { Point, Rectangle } from '@projectstorm/geometry';
 
 export interface CircleNodeModelOptions extends BaseModelOptions {
     type?: string;
@@ -48,5 +49,9 @@ export class CircleNodeModel extends NodeModel {
         this.type = event.data.type;
 		this.label = event.data.label;
 		this.data = event.data.data;
+	}
+
+	getBoundingBox(): Rectangle {
+		return new Rectangle(this.getPosition(), 0, 0);
 	}
 }

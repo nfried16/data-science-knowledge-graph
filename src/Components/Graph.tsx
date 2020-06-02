@@ -38,6 +38,7 @@ let nodes = {
 	'Faculty': [],
 	'Hubs': [],
 }
+let maxwidth = 0;
 
 let alllinks = [];
 let links = {
@@ -143,16 +144,24 @@ class Graph extends React.Component {
 		engine.getLabelFactories().clearFactories();
 		engine.getLabelFactories().registerFactory(new CustomLabelFactory());
 		engine.setModel(model);
-		this.setState({engine: engine}, this.resetZoom)
+		this.setState({engine: engine}, this.resetZoom);
 	}
 
 	// Fit all nodes
-	resetZoom() {
-		setTimeout(() => {
-			const tempengine = this.state.engine;
-			tempengine.getModel().clearSelection();
-			tempengine.zoomToFitNodes(50);
-			this.setState({engine: tempengine})
+	async resetZoom() {
+		await new Promise((resolve, reject) =>  {
+			setTimeout(() => {
+				const tempengine = this.state.engine;
+				tempengine.getModel().clearSelection();
+				tempengine.zoomToFitNodes(200)
+				allnodes.forEach(node => {
+					console.log(node)
+					let pos = node.getPosition();
+					node.setPosition(pos.x + window.innerWidth/2- 200, pos.y - 50);
+				})
+				this.setState({engine: tempengine});
+				resolve()
+			})
 		})
 	}
 
