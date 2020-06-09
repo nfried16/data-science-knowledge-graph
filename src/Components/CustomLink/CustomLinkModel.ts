@@ -37,8 +37,8 @@ export class CustomLinkModel extends LinkModel<CustomLinkModelGenerics> {
 		super({
 			type: 'custom',
 			width: options.width || 3,
-			color: options.color || 'gray',
-			selectedColor: options.selectedColor || 'rgb(0,192,255)',
+			color: options.color || 'red',
+			selectedColor: options.selectedColor || 'rgb(255,48,0)',
 			curvyness: 50,
 			...options
 		});

@@ -45,16 +45,23 @@ html, body, #application{
 }
 
 .rectangle-node{
-	border: 1px solid gray;
+	border: 3px solid;
 	border-radius: 5px;
-	background: darkblue;
+	background: white;
 	min-width: 50px;
 	min-height: 50px;
 	display: flex;
-	flex-direction: column;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: center;
 	position: relative;
+}
+
+.rectangle-node:hover{
+	cursor: grab;
+}
+
+.rectangle-node:active{
+	cursor: grabbing;
 }
 
 /* Static 75x75 */

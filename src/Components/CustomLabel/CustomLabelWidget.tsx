@@ -10,7 +10,7 @@ export interface CustomLabelWidgetProps {
 export const Label = styled.div`
 	background: rgba(255, 255, 255, 0);
 	border-radius: 5px;
-	color: rgb(0,0,255);
+	color: rgb(254,54,54);
 	font-weight: 700;
 	font-size: 20px;
 	padding: 0px 3px;

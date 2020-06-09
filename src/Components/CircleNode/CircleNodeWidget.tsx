@@ -57,14 +57,14 @@ export class CircleNodeWidget extends React.Component<CircleNodeWidgetProps, Cir
                     <PortWidget style = {{position: 'absolute', left: '50%'}} engine={this.props.engine} port={this.props.node.getPort('port')}>
                         <div className="circle-port" />
                     </PortWidget>
-                    <div style = {{margin: 10, display: 'flex', justifyItems: 'center', alignItems: 'center', position: 'relative', fontFamily: 'Calibri', fontSize: 12, whiteSpace: 'nowrap'}}>
+                    <div style = {{margin: 10, display: 'flex', justifyItems: 'center', alignItems: 'center', position: 'relative', fontFamily: 'Calibri', fontSize: 14, whiteSpace: 'nowrap'}}>
                         <div style = {{color: color[this.props.node.type][1], position: 'absolute'}}>
                             <b>
                                 {this.props.node.label}
                             </b>
                         </div>
                         <div style = {{padding: '50% 0', width: 'auto'}}>
-                            <div style = {{visibility: 'hidden', height: 0, fontSize: 12}}>
+                            <div style = {{visibility: 'hidden', height: 0, fontSize: 14}}>
                                 <b>
                                     {this.props.node.label}
                                 </b>

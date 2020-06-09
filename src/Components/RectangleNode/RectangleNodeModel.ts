@@ -2,48 +2,55 @@ import { NodeModel, DefaultPortModel } from '@projectstorm/react-diagrams';
 import { BaseModelOptions } from '@projectstorm/react-canvas-core';
 
 export interface RectangleNodeModelOptions extends BaseModelOptions {
-    color?: string;
-    label?: string;
+	type?: string;
+	label?: string;
+	data?: object;
 }
 
 export class RectangleNodeModel extends NodeModel {
-    color: string;
-    label: string;
+    type: string;
+	label: string;
+	data: object;
 
 	constructor(options: RectangleNodeModelOptions = {}) {
 		super({
 			...options,
 			type: 'rectangle-node'
 		});
-        this.color = options.color || 'red';
-        this.label = options.label || 'Enter Label';
+        this.type = options.type || 'Hubs';
+		this.label = options.label || 'Enter Label';
+		this.data = options.data || {};
 
 		// setup an in and out port
 		this.addPort(
 			new DefaultPortModel({
 				in: false,
-				name: 'in'
+				name: 'port'
 			})
 		);
-		this.addPort(
-			new DefaultPortModel({
-				in: false,
-				name: 'out'
-			})
-		);
+	}
+
+	getWidth() {
+		return this.width;
+	}
+
+	getHeight() {
+		return this.height;
 	}
 
 	serialize() {
 		return {
 			...super.serialize(),
-            color: this.color,
-            label: this.label
+            type: this.type,
+			label: this.label,
+			data: this.data,
 		};
 	}
 
 	deserialize(event): void {
 		super.deserialize(event);
-        this.color = event.data.color;
-        this.label = event.data.label;
+        this.type = event.data.type;
+		this.label = event.data.label;
+		this.data = event.data.data;
 	}
 }

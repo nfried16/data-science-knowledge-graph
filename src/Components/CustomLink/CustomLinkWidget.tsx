@@ -5,6 +5,9 @@ import { CustomLinkPointWidget } from './CustomLinkPointWidget';
 import { CustomLinkSegmentWidget } from './CustomLinkSegmentWidget';
 import { CustomLabelModel } from '../CustomLabel/CustomLabelModel';
 import { MouseEvent } from 'react';
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
+import { resolve } from 'dns';
+import { setTimeout } from 'timers';
 
 export interface CustomLinkProps {
 	link: CustomLinkModel;
@@ -23,7 +26,7 @@ export class CustomLinkWidget extends React.Component<CustomLinkProps, CustomLin
 		super(props);
 		this.refPaths = [];
 		this.state = {
-			selected: false
+			selected: false,
 		};
 	}
 
@@ -80,26 +83,75 @@ export class CustomLinkWidget extends React.Component<CustomLinkProps, CustomLin
 		);
 	}
 
+	getAngle(px1, py1, px2, py2) { 
+		const x = px2-px1; 
+		const y = py2-py1; 
+		const hypotenuse = Math.sqrt(Math.pow(x, 2)+Math.pow(y, 2)); 
+		let cos = x/hypotenuse; 
+		let radian = Math.acos(cos); 
+		let angle = 180/(Math.PI/radian); 
+		if (y<0) { 
+		  angle = -angle; 
+		} else if ((y == 0) && (x<0)) { 
+		  angle = 180; 
+		} 
+		return angle; 
+	}
+
 	generateLink(path: string, extraProps: any, id: string | number): JSX.Element {
+		let source = this.props.link.getSourcePort();
+		let target = this.props.link.getTargetPort();
+		let p1 = source.getPosition();
+		let p2 = target.getPosition();
+		let angle = this.getAngle(p1.x, p1.y, p2.x, p2.y);
+		let w = target.getNode().getBoundingBox().getWidth();
+		let h = target.getNode().getBoundingBox().getHeight(); 
+		let rat = Math.atan(h/w)*180/Math.PI;
+		var disp = [w/2, h/2]
+		if(angle >= -rat && angle <= rat)
+			disp[1] = (w/2)*Math.tan(angle*Math.PI/180);
+		else if(angle >= rat && angle <= (180-rat))
+			disp[0] = (h/2)*Math.tan((90-angle)*Math.PI/180);
+		else if(angle >= (180-rat) || angle <= (rat-180)) {
+			disp[0] = -disp[0];
+			disp[1] = -(w/2)*Math.tan((180+angle)*Math.PI/180);
+		}
+		else {
+			disp[1] = -disp[1];
+			disp[0] = -(h/2)*Math.tan((90-angle)*Math.PI/180);
+		}
+		const dx = disp[0];
+		const dy = disp[1];
+		let x = target.getX() - .95*dx;
+		let y = target.getY() - .95*dy;
 		const ref = React.createRef<SVGPathElement>();
 		this.refPaths.push(ref);
 		return (
-			<CustomLinkSegmentWidget
-				key={`link-${id}`}
-				path={path}
-				selected={this.state.selected}
-				diagramEngine={this.props.diagramEngine}
-				factory={this.props.diagramEngine.getFactoryForLink(this.props.link)}
-				link={this.props.link}
-				forwardRef={ref}
-				onSelection={selected => {
-					this.setState({ selected: selected }, () => {
-					this.props.link.getLabels()[0].setSelected(selected);
-					this.props.diagramEngine.repaintCanvas();
-					});
-				}}
-				extras={extraProps}
-			/>
+			<svg key = {`arrow-${id}`}>
+				<CustomLinkSegmentWidget
+					key={`link-${id}`}
+					path={path}
+					selected={this.state.selected}
+					diagramEngine={this.props.diagramEngine}
+					factory={this.props.diagramEngine.getFactoryForLink(this.props.link)}
+					link={this.props.link}
+					forwardRef={ref}
+					onSelection={selected => {
+						this.setState({ selected: selected }, () => {
+						this.props.link.getLabels()[0].setSelected(selected);
+						this.props.diagramEngine.repaintCanvas();
+						});
+					}}
+					extras={extraProps}
+				/>
+				<polygon 
+					fill = '#FF0000'
+					x={x}
+					y={y}
+					transform={`rotate(${angle}, ${x}, ${y})`}
+					points={`${x - 10},${y - 8} ${x},${y} ${x - 10},${y + 8}`}
+				/>
+			</svg>
 		);
 	}
 
@@ -153,7 +205,6 @@ export class CustomLinkWidget extends React.Component<CustomLinkProps, CustomLin
 				paths.push(this.generatePoint(points[points.length - 1]));
 			}
 		}
-
 		return <g data-custom-link-test={this.props.link.getOptions().testName}>{paths}</g>;
 	}
 }

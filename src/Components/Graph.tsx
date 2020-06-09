@@ -63,7 +63,7 @@ class Graph extends React.Component {
 		else if(keys.includes(names[1])) {
 			return linkcolors[names[1]];
 		}
-		return '#FFFFFF';
+		return '#000000';
 	}
 
 	componentWillMount() {
@@ -79,12 +79,33 @@ class Graph extends React.Component {
 			{name: 'Humanities', type: 'Hubs', links: ['Data+']},
 		];
 
+		// Temp Random Nodes/Links
+		for(var i = 0; i < 82; i++) {
+			let name = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, Math.random()*10+4);
+			ret.push({name: name, type: types[Math.floor(Math.random()*4)], links: [] });
+		}
+		for(var j = 0; j < ret.length; j++) {
+			if(Math.random()<.33) {
+				let ind = Math.floor(Math.random()*ret.length);
+				if(ind != j)
+					ret[j].links.push(ret[ind].name);
+			}
+		}
 		// For Circle Layout
 		const points = ret.length;
 		let allpos = [];
-		const rad = 175*ret.length/(2*Math.PI);
-		for(var a = 3*Math.PI; a > Math.PI; a-=(2*Math.PI/ret.length)) {
-			allpos.push([Math.cos(a) * rad, Math.sin(a) * rad]);
+		let t = 0;
+		let c = 1;
+		while(t < ret.length) {
+			let r = 120*(c-1);
+			for(var i = 0; i < Math.pow(c, 2); i++) {
+				if(t + i > ret.length)
+					break;
+				let a = 2*Math.PI/Math.pow(c, 2)*i;
+				allpos.push({x: 1.5*r*Math.cos(a) + Math.random()*100-50, y: r*Math.sin(a) + Math.random()*100-50});
+			}
+			t = t+i;
+			c++;
 		}
 		
 		//For Grid Layout
@@ -97,7 +118,7 @@ class Graph extends React.Component {
 		
 		// Add Nodes
 		ret.forEach(add => {
-			const node = new CircleNodeModel({ label: add.name, type: add.type, 
+			const node = new RectangleNodeModel({ label: add.name, type: add.type, 
 				data: {
 						'Type': 'Faculty',
 						'History': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non nisl ac eros pharetra fringilla. Nullam malesuada tempus erat. Cras vel purus rhoncus, sodales massa non, interdum mauris. Phasellus id nulla non risus posuere porttitor. Phasellus ac nisi et lectus molestie efficitur vel a eros. Proin turpis mi, auctor eget nisi ac, pharetra euismod nulla. Fusce vulputate tellus sed sapien vestibulum elementum. Ut et tellus ac diam malesuada vulputate eget eu tortor.',
@@ -108,7 +129,7 @@ class Graph extends React.Component {
 			});
 			nodes[node.type].push(node);
 			allnodes.push(node);
-			node.setPosition(allpos[allnodes.length-1][0], allpos[allnodes.length-1][1]);
+			node.setPosition(allpos[allnodes.length-1].x, allpos[allnodes.length-1].y);
 			// To position by center:
 			// setTimeout(() => {
 			// 	node.setPosition(node.getX() - node.getWidth()/2, node.getY() - node.getWidth()/2);
@@ -138,8 +159,12 @@ class Graph extends React.Component {
 		let model = new DiagramModel();
 		model.addAll(...allnodes, ...alllinks);
 		const engine = createEngine({ registerDefaultZoomCanvasAction: false });
+		alllinks.forEach(link => {
+			link.setSelected(true);
+		})
 		engine.getActionEventBus().registerAction(new ZoomCanvasAction({ inverseZoom: true }));
 		engine.getNodeFactories().registerFactory(new CircleNodeFactory());
+		engine.getNodeFactories().registerFactory(new RectangleNodeFactory());
 		engine.getLinkFactories().registerFactory(new CustomLinkFactory());
 		engine.getLabelFactories().clearFactories();
 		engine.getLabelFactories().registerFactory(new CustomLabelFactory());
@@ -153,12 +178,8 @@ class Graph extends React.Component {
 			setTimeout(() => {
 				const tempengine = this.state.engine;
 				tempengine.getModel().clearSelection();
-				tempengine.zoomToFitNodes(200)
-				allnodes.forEach(node => {
-					console.log(node)
-					let pos = node.getPosition();
-					node.setPosition(pos.x + window.innerWidth/2- 200, pos.y - 50);
-				})
+				tempengine.zoomToFitNodes(-100)
+				this.state.engine.getModel().setOffsetX(window.innerWidth/2)
 				this.setState({engine: tempengine});
 				resolve()
 			})

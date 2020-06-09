@@ -18,7 +18,7 @@ export class CircleNodeModel extends NodeModel {
 			...options,
 			type: 'circle-node'
 		});
-        this.type = options.type || 'Organizations';
+        this.type = options.type || 'Hubs';
 		this.label = options.label || 'Enter Label';
 		this.data = options.data || {};
 

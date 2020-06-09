@@ -26,6 +26,7 @@ export class CustomLinkPointWidget extends React.Component<CustomLinkPointWidget
 
 	render() {
 		const { point } = this.props;
+		console.log(point)
 		return (
 			<g>
 				<circle
