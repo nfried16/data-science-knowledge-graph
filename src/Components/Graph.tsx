@@ -14,6 +14,8 @@ import { ZoomCanvasAction } from '@projectstorm/react-canvas-core';
 import { CustomLinkModel } from './CustomLink/CustomLinkModel';
 import { CustomLinkFactory } from './CustomLink/CustomLinkFactory';
 import 'semantic-ui-css/semantic.min.css';
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
+import { INSPECT_MAX_BYTES } from 'buffer';
 
 const linkcolors = {
 	'Organizations::Faculty': '#000000',
@@ -38,7 +40,6 @@ let nodes = {
 	'Faculty': [],
 	'Hubs': [],
 }
-let maxwidth = 0;
 
 let alllinks = [];
 let links = {
@@ -66,6 +67,16 @@ class Graph extends React.Component {
 		return '#000000';
 	}
 
+	getRow(nodenum: number) {
+		return Math.ceil((1+Math.sqrt(1-4*(1-nodenum)))/2);
+	}
+
+	getNodesRow(row: number) {
+		if(row == 1) 
+			return 1;
+		return (row-1)*2;
+	}
+
 	componentWillMount() {
 		const ret = [
 			{name: 'DAML', type: 'Organizations', links: []},
@@ -82,18 +93,79 @@ class Graph extends React.Component {
 		// Temp Random Nodes/Links
 		for(var i = 0; i < 82; i++) {
 			let name = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, Math.random()*10+4);
-			ret.push({name: name, type: types[Math.floor(Math.random()*4)], links: [] });
+			let type = types[Math.floor(Math.random()*4)];
+			ret.push({name: name, type: type, links: [] });
 		}
 		for(var j = 0; j < ret.length; j++) {
-			if(Math.random()<.33) {
+			if(Math.random()<.3) {
 				let ind = Math.floor(Math.random()*ret.length);
 				if(ind != j)
 					ret[j].links.push(ret[ind].name);
 			}
 		}
-		// For Circle Layout
-		const points = ret.length;
+
+		// Get amount of each type
+		let amounts = {
+			'Hubs': 0,
+			'Programs': 0,
+			'Organizations': 0,
+			'Faculty': 0,
+		}
+		ret.forEach(node => {
+			amounts[node.type]++;
+		})
+		const max = Math.max(...Object.values(amounts));
+		const rows = this.getRow(max);
+		let tot = (rows-1)*(rows-2)+1;
+		let lastrows = {
+			'Hubs': tot,
+			'Programs': tot,
+			'Organizations': tot,
+			'Faculty': tot,
+		}
+		let last = {
+			'Hubs': amounts['Hubs']- tot,
+			'Programs': amounts['Programs'] - tot,
+			'Organizations': amounts['Organizations'] - tot,
+			'Faculty': amounts['Faculty'] - tot,
+		}
+		Object.keys(last).forEach(lam => {
+			if(last[lam] < 0) {
+				last[lam] = this.getNodesRow(rows-1)+last[lam];
+				lastrows[lam] = (rows-2)*(rows-3)+1;
+			}
+		})
+		// Create clusters
 		let allpos = [];
+		let curr = {
+			'Hubs': 1,
+			'Programs': 1,
+			'Organizations': 1,
+			'Faculty': 1,
+		}
+		let base = {
+			'Faculty': 0,
+			'Programs': Math.PI/2,
+			'Organizations': Math.PI,
+			'Hubs': 3*Math.PI/2,
+		}
+		for(var n = 0; n < ret.length; n++) {
+			let row = this.getRow(curr[ret[n].type])
+			let r = 120*row;
+			let currinrow = row*(row-1)+2-curr[ret[n].type];
+			let a = 0;
+			console.log(ret[n].type + '---' + curr[ret[n].type] + '---' + lastrows[ret[n].type])
+			if(curr[ret[n].type] > lastrows[ret[n].type]) {
+				currinrow = amounts[ret[n].type] - curr[ret[n].type] + 1;
+				a = base[ret[n].type] + currinrow*((Math.PI/2)/(last[ret[n].type] + 1));
+			}
+			else
+				a = base[ret[n].type] + currinrow*((Math.PI/2)/(this.getNodesRow(row)+1));
+			allpos.push({x: 1.5*r*Math.cos(a) + Math.random()*100-50, y: r*Math.sin(a) + Math.random()*80-40})
+			curr[ret[n].type]++;
+		}
+		/*
+		// For Circle Layout
 		let t = 0;
 		let c = 1;
 		while(t < ret.length) {
@@ -106,16 +178,7 @@ class Graph extends React.Component {
 			}
 			t = t+i;
 			c++;
-		}
-		
-		//For Grid Layout
-		const pos = {
-			'Hubs': [50, 50],
-			'Organizations': [50, 150],
-			'Faculty': [50, 250],
-			'Programs': [50, 350],
-		}
-		
+		}*/
 		// Add Nodes
 		ret.forEach(add => {
 			const node = new RectangleNodeModel({ label: add.name, type: add.type, 
