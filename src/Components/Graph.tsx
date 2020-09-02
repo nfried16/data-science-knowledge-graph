@@ -16,6 +16,7 @@ import { CustomLinkFactory } from './CustomLink/CustomLinkFactory';
 import 'semantic-ui-css/semantic.min.css';
 import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 import { INSPECT_MAX_BYTES } from 'buffer';
+import { CustomLabelModel } from './CustomLabel/CustomLabelModel';
 
 const linkcolors = {
 	'Organizations::Faculty': '#000000',
@@ -28,9 +29,9 @@ const linkcolors = {
 
 const types = [
 	'Organizations',
+	'Hubs',
 	'Faculty',
 	'Programs',
-	'Hubs'
 ]
 
 let allnodes = [];
@@ -91,7 +92,7 @@ class Graph extends React.Component {
 		];
 
 		// Temp Random Nodes/Links
-		for(var i = 0; i < 82; i++) {
+		for(var i = 0; i < 60; i++) {
 			let name = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, Math.random()*10+4);
 			let type = types[Math.floor(Math.random()*4)];
 			ret.push({name: name, type: type, links: [] });
@@ -114,8 +115,14 @@ class Graph extends React.Component {
 		ret.forEach(node => {
 			amounts[node.type]++;
 		})
-		const max = Math.max(...Object.values(amounts));
-		const rows = this.getRow(max);
+		// Setting up layout of nodes
+		const allrows = {
+			'Hubs': this.getRow(amounts['Hubs']),
+			'Programs': this.getRow(amounts['Programs']),
+			'Organizations': this.getRow(amounts['Organizations']),
+			'Faculty': this.getRow(amounts['Faculty']),
+		}
+		const rows = Math.max(...Object.values(allrows));
 		let tot = (rows-1)*(rows-2)+1;
 		let lastrows = {
 			'Hubs': tot,
@@ -150,8 +157,8 @@ class Graph extends React.Component {
 			'Hubs': 3*Math.PI/2,
 		}
 		for(var n = 0; n < ret.length; n++) {
-			let row = this.getRow(curr[ret[n].type])
-			let r = 120*row;
+			let row = this.getRow(curr[ret[n].type]);
+			let r = 120*row/(allrows[ret[n].type]/rows);
 			let currinrow = row*(row-1)+2-curr[ret[n].type];
 			let a = 0;
 			console.log(ret[n].type + '---' + curr[ret[n].type] + '---' + lastrows[ret[n].type])
@@ -161,7 +168,7 @@ class Graph extends React.Component {
 			}
 			else
 				a = base[ret[n].type] + currinrow*((Math.PI/2)/(this.getNodesRow(row)+1));
-			allpos.push({x: 1.5*r*Math.cos(a) + Math.random()*100-50, y: r*Math.sin(a) + Math.random()*80-40})
+			allpos.push({x: 1.75*r*Math.cos(a) + Math.random()*100-50, y: r*Math.sin(a) + Math.random()*80-40})
 			curr[ret[n].type]++;
 		}
 		/*
@@ -241,7 +248,7 @@ class Graph extends React.Component {
 			setTimeout(() => {
 				const tempengine = this.state.engine;
 				tempengine.getModel().clearSelection();
-				tempengine.zoomToFitNodes(-100)
+				tempengine.zoomToFitNodes(50)
 				this.state.engine.getModel().setOffsetX(window.innerWidth/2)
 				this.setState({engine: tempengine});
 				resolve()

@@ -1,3 +1,6 @@
+## View current deploy
+https://cocky-haibt-2f5cb9.netlify.app/
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
