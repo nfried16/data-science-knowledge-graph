@@ -1,3 +1,6 @@
+# DS@Duke Knowledge Graph
+![sample-graph](./08-11-sample.jpg)
+
 ## View current deploy
 All data is currently randomly generated  
 https://cocky-haibt-2f5cb9.netlify.app/
